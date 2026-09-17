@@ -5,6 +5,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/sso-callback(.*)",
+  // Manufacturer website has its own self-contained account-creation flow.
+  "/manufacturer(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
