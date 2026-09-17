@@ -137,7 +137,7 @@ export function CustomSignUpForm() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const redirectTo = useMemo(
-    () => searchParams.get("redirect_url") || "/onboarding/roles",
+    () => searchParams.get("redirect_url") || "/",
     [searchParams],
   );
   const passwordStrength = checkPasswordStrength(password);

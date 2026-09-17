@@ -16,7 +16,7 @@ function safeInternalRedirect(value: string | string[] | undefined): string | nu
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const session = await auth();
   const params = await searchParams;
-  const redirectTo = safeInternalRedirect(params.redirect_url) ?? "/onboarding/roles";
+  const redirectTo = safeInternalRedirect(params.redirect_url) ?? "/";
 
   if (session.userId) {
     redirect(redirectTo);
