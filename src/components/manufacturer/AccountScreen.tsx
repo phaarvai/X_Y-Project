@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
+import { FactoryMark } from "@/components/layout/Logo";
 import {
   BackIcon,
   BuildingIcon,
   CalendarIcon,
   CapacityIcon,
   CategoryIcon,
-  ChartLineIcon,
   GlobeIcon,
   GridIcon,
   MailIcon,
@@ -134,9 +134,7 @@ export function AccountScreen({ onBack, onAccountCreated }: AccountScreenProps) 
     <div className="account-profile-page">
       <aside className="account-side-panel">
         <div className="account-side-logo">
-          <div className="account-side-logo-mark">
-            <ChartLineIcon size={20} />
-          </div>
+          <FactoryMark className="account-side-factory-mark" />
           <span>X!Y</span>
         </div>
 

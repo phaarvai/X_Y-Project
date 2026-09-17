@@ -1,4 +1,4 @@
-import { ChartLineIcon } from "@/components/manufacturer/icons";
+import { FactoryMark } from "@/components/layout/Logo";
 
 type LandingScreenProps = {
   onJoin: () => void;
@@ -29,9 +29,7 @@ export function LandingScreen({ onJoin, onBackToLanding }: LandingScreenProps) {
     <div className="ov-wrap">
       <div className="ov-topbar">
         <div className="topbar-logo">
-          <div className="topbar-logo-mark">
-            <ChartLineIcon size={16} />
-          </div>
+          <FactoryMark className="topbar-factory-mark" />
           X!Y
         </div>
         <button

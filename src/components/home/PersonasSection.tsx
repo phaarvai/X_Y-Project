@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ManufacturerExploreCard } from "@/components/home/ManufacturerExploreCard";
 
 type HomePersona = {
   title: string;
@@ -7,13 +8,13 @@ type HomePersona = {
   href: string;
 };
 
+const MANUFACTURER_PERSONA = {
+  title: "Manufacturer",
+  job: "Discover qualified production opportunities and connect with buyers, suppliers, and production partners.",
+  iconId: "ico-manufacturer",
+} as const;
+
 const HOME_PERSONAS: HomePersona[] = [
-  {
-    title: "Manufacturer",
-    job: "Discover qualified production opportunities and connect with buyers, suppliers, and production partners.",
-    iconId: "ico-manufacturer",
-    href: "/manufacturer",
-  },
   {
     title: "Visionary",
     job: "Turn bold ideas into manufacturable products with the right design, technology, and production partners.",
@@ -72,6 +73,11 @@ export function PersonasSection() {
         </div>
 
         <div className="persona-grid">
+          <ManufacturerExploreCard
+            title={MANUFACTURER_PERSONA.title}
+            job={MANUFACTURER_PERSONA.job}
+            iconId={MANUFACTURER_PERSONA.iconId}
+          />
           {HOME_PERSONAS.map((persona) => (
             <Link
               key={persona.title}

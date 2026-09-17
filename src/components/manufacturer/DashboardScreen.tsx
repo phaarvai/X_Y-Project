@@ -1,8 +1,8 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { FactoryMark } from "@/components/layout/Logo";
 import {
   BellIcon,
   CalendarDaysIcon,
-  ChartLineIcon,
   CheckIcon,
   DocumentIcon,
   ListIcon,
@@ -104,9 +104,7 @@ export function DashboardScreen({
       <div className="topbar">
         <div className="topbar-inner">
           <div className="topbar-logo">
-            <div className="topbar-logo-mark">
-              <ChartLineIcon size={16} />
-            </div>
+            <FactoryMark className="topbar-factory-mark" />
             X!Y <span className="topbar-crumb">Manufacturer Dashboard</span>
           </div>
           <div className="topbar-actions">

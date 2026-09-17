@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type LogoProps = {
@@ -6,6 +7,7 @@ type LogoProps = {
   markClassName?: string;
 };
 
+/** Factory mark matching the official X!Y logo (icon only, for dark or light surfaces). */
 export function FactoryMark({ className = "factory-mark" }: { className?: string }) {
   return (
     <svg
@@ -27,12 +29,17 @@ export function FactoryMark({ className = "factory-mark" }: { className?: string
   );
 }
 
+/** Full X!Y wordmark from the official logo asset (icon + text). */
 export function Logo({ href = "/", className = "logo", markClassName }: LogoProps) {
   const content = (
-    <>
-      <FactoryMark className={markClassName ?? "factory-mark"} />
-      X!Y
-    </>
+    <Image
+      src="/images/xy-logo.png"
+      alt="X!Y"
+      width={156}
+      height={46}
+      className={markClassName ?? "logo-img"}
+      priority
+    />
   );
 
   if (href) {

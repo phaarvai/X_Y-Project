@@ -1,6 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { AccountScreen, type AccountSubmission } from "@/components/manufacturer/AccountScreen";
 import { DashboardScreen } from "@/components/manufacturer/DashboardScreen";
 import { LandingScreen } from "@/components/manufacturer/LandingScreen";
@@ -13,6 +22,16 @@ import {
 import { RecurringModal } from "@/components/manufacturer/RecurringModal";
 import { CheckIcon } from "@/components/manufacturer/icons";
 import {
+  isManufacturerAccountPath,
+  isManufacturerDashboardPath,
+  MANUFACTURER_ACCOUNT_PATH,
+  MANUFACTURER_DASHBOARD_PATH,
+  MANUFACTURER_OVERVIEW_PATH,
+  manufacturerCreateAccountHref,
+  markManufacturerProfileComplete,
+  readManufacturerProfileComplete,
+} from "@/lib/auth/manufacturerAccess";
+import {
   createInitialManufacturerState,
   type ManufacturerState,
   type RecurringAvailability,
@@ -20,8 +39,45 @@ import {
 
 type Screen = "landing" | "account" | "dashboard";
 
+function screenFromPathname(pathname: string): Screen {
+  if (isManufacturerDashboardPath(pathname)) return "dashboard";
+  if (isManufacturerAccountPath(pathname)) return "account";
+  return "landing";
+}
+
+function applyAccountSubmission(
+  submission: AccountSubmission,
+  setState: Dispatch<SetStateAction<ManufacturerState>>,
+  setProfileData: Dispatch<SetStateAction<ProfileWizardData>>,
+) {
+  setState((current) => ({
+    ...current,
+    account: {
+      firstName: submission.firstName,
+      lastName: submission.lastName,
+      companyName: submission.companyName,
+      companyType: submission.companyType,
+      country: submission.country,
+      dob: submission.dob,
+      phone: submission.phone,
+      capacity: submission.capacity,
+    },
+    contact: isValidEmail(submission.contact)
+      ? { email: submission.contact, phone: "" }
+      : { email: "", phone: submission.contact },
+  }));
+  setProfileData((current) => ({
+    ...current,
+    company: { ...current.company, name: submission.companyName },
+  }));
+}
+
 export function ManufacturerApp() {
-  const [screen, setScreen] = useState<Screen>("landing");
+  const router = useRouter();
+  const pathname = usePathname();
+  const { isLoaded, isSignedIn } = useAuth();
+  const screen = screenFromPathname(pathname);
+
   const [state, setState] = useState<ManufacturerState>(createInitialManufacturerState);
   const [profileData, setProfileData] = useState<ProfileWizardData>(() =>
     createBlankProfileData(),
@@ -36,14 +92,6 @@ export function ManufacturerApp() {
   });
   const toastTimer = useRef<number | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (toastTimer.current !== null) {
-        window.clearTimeout(toastTimer.current);
-      }
-    };
-  }, []);
-
   const showToast = useCallback((message: string) => {
     setToast({ message, visible: true });
     if (toastTimer.current !== null) {
@@ -53,6 +101,35 @@ export function ManufacturerApp() {
       setToast((current) => ({ ...current, visible: false }));
     }, 3000);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current !== null) {
+        window.clearTimeout(toastTimer.current);
+      }
+    };
+  }, []);
+
+  // Auth + route guards (does not replace Clerk; only keeps screens in sync).
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    if (!isSignedIn) {
+      if (isManufacturerDashboardPath(pathname) || isManufacturerAccountPath(pathname)) {
+        router.replace(
+          isManufacturerAccountPath(pathname)
+            ? manufacturerCreateAccountHref()
+            : MANUFACTURER_OVERVIEW_PATH,
+        );
+      }
+      return;
+    }
+
+    // After profile is complete, don't show the setup form again.
+    if (isManufacturerAccountPath(pathname) && readManufacturerProfileComplete()) {
+      router.replace(MANUFACTURER_DASHBOARD_PATH);
+    }
+  }, [isLoaded, isSignedIn, pathname, router]);
 
   const flags = {
     companyDetailsDone: profileData.company.name.trim() !== "" && state.epic2.companyDetailsDone,
@@ -65,27 +142,9 @@ export function ManufacturerApp() {
   const pct = Math.round(15 + (doneCount / 5) * 85);
 
   function handleAccountCreated(submission: AccountSubmission) {
-    setState((current) => ({
-      ...current,
-      account: {
-        firstName: submission.firstName,
-        lastName: submission.lastName,
-        companyName: submission.companyName,
-        companyType: submission.companyType,
-        country: submission.country,
-        dob: submission.dob,
-        phone: submission.phone,
-        capacity: submission.capacity,
-      },
-      contact: isValidEmail(submission.contact)
-        ? { email: submission.contact, phone: "" }
-        : { email: "", phone: submission.contact },
-    }));
-    setProfileData((current) => ({
-      ...current,
-      company: { ...current.company, name: submission.companyName },
-    }));
-    setScreen("dashboard");
+    applyAccountSubmission(submission, setState, setProfileData);
+    markManufacturerProfileComplete();
+    router.push(MANUFACTURER_DASHBOARD_PATH);
     showToast("Account created — let’s build your profile.");
   }
 
@@ -112,8 +171,6 @@ export function ManufacturerApp() {
     setState((current) => ({
       ...current,
       epic2: {
-        // Derived from each step's own validation rules (as the demo marks
-        // them done when the user passes "Save & Next" on that step).
         companyDetailsDone: data.company.name.trim() !== "" && data.company.about.trim() !== "",
         locationDone:
           data.location.address.trim() !== "" &&
@@ -197,9 +254,21 @@ export function ManufacturerApp() {
     showToast("Declined — capacity released back to Available.");
   }
 
-  function handleBackToLanding() {
-    setScreen("landing");
-    window.scrollTo(0, 0);
+  if (!isLoaded) {
+    return <div className="mfg-root" aria-busy="true" />;
+  }
+
+  // Avoid flashing the wrong screen while redirects settle.
+  if (!isSignedIn && (screen === "dashboard" || screen === "account")) {
+    return <div className="mfg-root" aria-busy="true" />;
+  }
+
+  if (
+    isSignedIn &&
+    screen === "account" &&
+    readManufacturerProfileComplete()
+  ) {
+    return <div className="mfg-root" aria-busy="true" />;
   }
 
   return (
@@ -207,15 +276,25 @@ export function ManufacturerApp() {
       {screen === "landing" ? (
         <LandingScreen
           onJoin={() => {
-            setScreen("account");
-            window.scrollTo(0, 0);
+            // Signed-in → profile setup. Signed-out → existing Create Account.
+            router.push(
+              isSignedIn ? MANUFACTURER_ACCOUNT_PATH : manufacturerCreateAccountHref(),
+            );
           }}
-          onBackToLanding={() => showToast("This is a demo — there is no landing page to return to.")}
+          onBackToLanding={() => {
+            router.push("/");
+          }}
         />
       ) : null}
 
       {screen === "account" ? (
-        <AccountScreen onBack={() => setScreen("landing")} onAccountCreated={handleAccountCreated} />
+        <AccountScreen
+          onBack={() => {
+            router.push(MANUFACTURER_OVERVIEW_PATH);
+            window.scrollTo(0, 0);
+          }}
+          onAccountCreated={handleAccountCreated}
+        />
       ) : null}
 
       {screen === "dashboard" ? (
@@ -232,7 +311,9 @@ export function ManufacturerApp() {
             onOpenRecurringModal={() => setRecurringOpen(true)}
             onAcceptBooking={handleAcceptBooking}
             onDeclineBooking={handleDeclineBooking}
-            onBackToLanding={handleBackToLanding}
+            onBackToLanding={() => {
+              router.push("/");
+            }}
             showToast={showToast}
           />
 

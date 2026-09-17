@@ -3,11 +3,23 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { CustomSignInForm } from "@/components/auth/CustomSignInForm";
 
-export default async function SignInPage() {
+type SignInPageProps = {
+  searchParams: Promise<{ redirect_url?: string | string[] }>;
+};
+
+function safeInternalRedirect(value: string | string[] | undefined): string | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
   const session = await auth();
+  const params = await searchParams;
+  const redirectTo = safeInternalRedirect(params.redirect_url) ?? "/onboarding/roles";
 
   if (session.userId) {
-    redirect("/onboarding/roles");
+    redirect(redirectTo);
   }
 
   return (

@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { ManufacturerApp } from "@/components/manufacturer/ManufacturerApp";
-import "@/app/manufacturer/manufacturer.css";
 
 export const metadata: Metadata = {
-  title: "X!Y — Manufacturer Dashboard",
+  title: "X!Y — Manufacturer",
 };
 
-export default function ManufacturerPage() {
-  return <ManufacturerApp />;
+export default function ManufacturerOverviewPage() {
+  return null;
 }
