@@ -115,12 +115,10 @@ export function ManufacturerApp() {
     if (!isLoaded) return;
 
     if (!isSignedIn) {
-      if (isManufacturerDashboardPath(pathname) || isManufacturerAccountPath(pathname)) {
-        router.replace(
-          isManufacturerAccountPath(pathname)
-            ? manufacturerCreateAccountHref()
-            : MANUFACTURER_OVERVIEW_PATH,
-        );
+      // Dashboard only — account redirects are handled by the server page so we
+      // don't race a freshly activated Clerk session after Explore → sign-in/up.
+      if (isManufacturerDashboardPath(pathname)) {
+        router.replace(MANUFACTURER_OVERVIEW_PATH);
       }
       return;
     }

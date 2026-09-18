@@ -123,6 +123,7 @@ export function CustomSignInForm() {
       if (result.status === "complete" && result.createdSessionId) {
         await setActive({ session: result.createdSessionId });
         router.push(redirectTo);
+        router.refresh();
         return;
       }
 
@@ -146,6 +147,7 @@ export function CustomSignInForm() {
         setFieldErrors((current) => ({ ...current, password: parsed.message }));
       } else if (parsed.code === "session_exists") {
         router.push(redirectTo);
+        router.refresh();
         return;
       } else if (parsed.code === "too_many_requests") {
         setStatus({ tone: "warn", message: parsed.message });
@@ -334,7 +336,16 @@ export function CustomSignInForm() {
       </button>
 
       <div className="switch-row">
-        Don&apos;t have an account? <Link href="/sign-up">Create account</Link>
+        Don&apos;t have an account?{" "}
+        <Link
+          href={
+            redirectTo && redirectTo !== "/"
+              ? `/sign-up?redirect_url=${encodeURIComponent(redirectTo)}`
+              : "/sign-up"
+          }
+        >
+          Create account
+        </Link>
       </div>
     </form>
   );

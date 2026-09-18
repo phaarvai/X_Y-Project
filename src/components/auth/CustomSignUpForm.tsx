@@ -256,6 +256,7 @@ export function CustomSignUpForm() {
       if (result.status === "complete" && result.createdSessionId) {
         await setActive({ session: result.createdSessionId });
         router.push(redirectTo);
+        router.refresh();
         return;
       }
 
@@ -637,7 +638,16 @@ export function CustomSignUpForm() {
       </button>
 
       <div className="switch-row">
-        Already have an account? <Link href="/sign-in">Sign in</Link>
+        Already have an account?{" "}
+        <Link
+          href={
+            redirectTo && redirectTo !== "/"
+              ? `/sign-in?redirect_url=${encodeURIComponent(redirectTo)}`
+              : "/sign-in"
+          }
+        >
+          Sign in
+        </Link>
       </div>
     </form>
   );
