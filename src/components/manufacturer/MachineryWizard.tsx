@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { ImagePhotoIcon } from "@/components/manufacturer/icons";
-import { WizardShell } from "@/components/manufacturer/WizardShell";
+import { WizardFooter, WizardShell } from "@/components/manufacturer/WizardShell";
 import type { MachineryListing } from "@/lib/manufacturer/types";
 
 const EPIC3_TOTAL = 7;
@@ -178,22 +178,14 @@ export function MachineryWizard({ onClose, onPublish, showToast }: MachineryWiza
       progressPct={STEP_LABELS[step - 1]}
       total={EPIC3_TOTAL}
       step={step}
-      onBack={handleBack}
       footer={
-        <div className="wiz-footer" style={{ justifyContent: "space-between" }}>
-          {step === EPIC3_TOTAL ? (
-            <span />
-          ) : (
-            <button type="button" className="btn-text" onClick={skip}>
-              Skip for now
-            </button>
-          )}
-          {step === EPIC3_TOTAL ? null : (
-            <button type="button" className="btn-primary" onClick={goNext}>
-              Save &amp; Next
-            </button>
-          )}
-        </div>
+        <WizardFooter
+          showPrevious
+          onPrevious={handleBack}
+          onSkip={skip}
+          onNext={goNext}
+          nextLabel="Save & Next"
+        />
       }
     >
       {step === 1 ? (

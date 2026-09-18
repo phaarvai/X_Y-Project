@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { CheckIcon, DownloadIcon, ImagePhotoIcon, MapPinIcon } from "@/components/manufacturer/icons";
-import { WizardShell } from "@/components/manufacturer/WizardShell";
+import { WizardFooter, WizardShell } from "@/components/manufacturer/WizardShell";
 import type { Certification, FaqEntry } from "@/lib/manufacturer/types";
 
 export type ProfileWizardData = {
@@ -331,16 +331,16 @@ export function ProfileWizard({
       progressPct={`${Math.round((doneCount / EPIC2_TOTAL) * 100)}% Complete`}
       total={EPIC2_TOTAL}
       step={step}
-      onBack={handleBack}
       footer={
-        <div className="wiz-footer" style={{ justifyContent: "space-between" }}>
-          <button type="button" className="btn-text" onClick={skip}>
-            Skip for now
-          </button>
-          <button type="button" className="btn-primary" onClick={goNext}>
-            {step === 1 ? "Get started" : step === EPIC2_TOTAL ? "Finish" : "Save & Next"}
-          </button>
-        </div>
+        <WizardFooter
+          showPrevious
+          onPrevious={handleBack}
+          onSkip={skip}
+          onNext={goNext}
+          nextLabel={
+            step === 1 ? "Get started" : step === EPIC2_TOTAL ? "Finish" : "Save & Next"
+          }
+        />
       }
     >
       {step === 1 ? (

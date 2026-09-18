@@ -881,9 +881,21 @@
   background: #fff;
   border-top: 1px solid var(--slate-200);
   padding: 16px 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.mfg-root .wiz-footer-side {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  min-width: 0;
+}
+.mfg-root .wiz-footer-left { justify-content: flex-start; }
+.mfg-root .wiz-footer-right { justify-content: flex-end; }
+.mfg-root .wiz-footer-skip {
+  justify-self: center;
+  grid-column: 2;
 }
 .mfg-root .wiz-footer .btn-back {
   background: none;
