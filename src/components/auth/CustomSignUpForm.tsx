@@ -337,6 +337,9 @@ export function CustomSignUpForm() {
         <span>{status?.message}</span>
       </div>
 
+      {/* Always mounted so Clerk bot protection can initialize (custom sign-up flows). */}
+      <div id="clerk-captcha" />
+
       {!needsVerification ? (
         <>
           <button
@@ -569,9 +572,6 @@ export function CustomSignUpForm() {
             {fieldErrors.consent}
           </div>
           <div className="consent-versions">Terms v1.2 · Privacy Policy v1.4</div>
-
-          {/* Required for Clerk bot protection on custom sign-up flows */}
-          <div id="clerk-captcha" />
 
           <div className="permission-note">
             <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
